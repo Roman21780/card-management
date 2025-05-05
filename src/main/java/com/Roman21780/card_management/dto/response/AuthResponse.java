@@ -1,10 +1,7 @@
 package com.Roman21780.card_management.dto.response;
 
 import com.Roman21780.card_management.model.User;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.management.relation.Role;
 
@@ -12,6 +9,7 @@ import javax.management.relation.Role;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuthResponse {
     private String token;
     private String email;

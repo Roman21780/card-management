@@ -1,11 +1,10 @@
-package com.Roman21780.card_management.security;
+package com.Roman21780.card_management.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +14,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Service("jwtSecurityService")
+@Service
 public class JwtService {
-    @Value("${jwt.secret}")
-    private String secret;
 
-    @Value("${jwt.expiration}")
-    private long expiration;
+    private static final String SECRET_KEY = "ваш_секретный_ключ_длиной_не_менее_256_бит";
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
@@ -31,11 +36,12 @@ public class JwtService {
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        return Jwts.builder()
+        return Jwts
+                .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -53,15 +59,6 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -72,7 +69,7 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

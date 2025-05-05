@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/card_management
     username: postgres
-    password: postgres
+    password: Serebro11!!
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
